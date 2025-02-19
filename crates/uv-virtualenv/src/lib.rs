@@ -52,7 +52,7 @@ impl Prompt {
 #[allow(clippy::fn_params_excessive_bools)]
 pub fn create_venv(
     location: &Path,
-    interpreter: Interpreter,
+    interpreter: &Interpreter,
     prompt: Prompt,
     cache: &Cache,
     system_site_packages: bool,
@@ -63,7 +63,7 @@ pub fn create_venv(
     // Create the virtualenv at the given location.
     let virtualenv = virtualenv::create(
         location,
-        &interpreter,
+        interpreter,
         prompt,
         system_site_packages,
         allow_existing,
