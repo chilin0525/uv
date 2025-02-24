@@ -2095,8 +2095,7 @@ fn install_git_private_https_pat_not_authorized() {
       ├─▶ failed to clone into: [CACHE_DIR]/git-v0/db/8401f5508e3e612d
       ╰─▶ process didn't exit successfully: `git fetch --force --update-head-ok 'https://git:***@github.com/astral-test/uv-private-pypackage' '+HEAD:refs/remotes/origin/HEAD'` (exit status: 128)
           --- stderr
-          remote: Support for password authentication was removed on August 13, 2021.
-          remote: Please see https://docs.github.com/get-started/getting-started-with-git/about-remote-repositories#cloning-with-https-urls for information on currently recommended modes of authentication.
+          remote: Invalid username or password.
           fatal: Authentication failed for 'https://github.com/astral-test/uv-private-pypackage/'
     "###);
 }
@@ -7009,6 +7008,146 @@ fn verify_hashes_editable() -> Result<()> {
      + idna==3.6
      + multidict==6.0.5
      + yarl==1.9.4
+    "###
+    );
+
+    Ok(())
+}
+
+/// Allow arguments within a `requirements.txt` file to be quoted or unquoted, as in the CLI.
+#[test]
+fn double_quoted_arguments() -> Result<()> {
+    let context = TestContext::new("3.12");
+
+    let constraints_in = context.temp_dir.child("constraints.in");
+    constraints_in.write_str(indoc::indoc! {r"
+        iniconfig==1.0.0
+    "})?;
+
+    let requirements_in = context.temp_dir.child("requirements.in");
+    requirements_in.write_str(indoc::indoc! {r#"
+       --constraint "./constraints.in"
+
+        iniconfig
+    "#})?;
+
+    uv_snapshot!(context.pip_install()
+        .arg("-r")
+        .arg("requirements.in"), @r###"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Resolved 1 package in [TIME]
+    Prepared 1 package in [TIME]
+    Installed 1 package in [TIME]
+     + iniconfig==1.0.0
+    "###
+    );
+
+    Ok(())
+}
+
+/// Allow arguments within a `requirements.txt` file to be quoted or unquoted, as in the CLI.
+#[test]
+fn single_quoted_arguments() -> Result<()> {
+    let context = TestContext::new("3.12");
+
+    let constraints_in = context.temp_dir.child("constraints.in");
+    constraints_in.write_str(indoc::indoc! {r"
+        iniconfig==1.0.0
+    "})?;
+
+    let requirements_in = context.temp_dir.child("requirements.in");
+    requirements_in.write_str(indoc::indoc! {r"
+       --constraint './constraints.in'
+
+        iniconfig
+    "})?;
+
+    uv_snapshot!(context.pip_install()
+        .arg("-r")
+        .arg("requirements.in"), @r###"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Resolved 1 package in [TIME]
+    Prepared 1 package in [TIME]
+    Installed 1 package in [TIME]
+     + iniconfig==1.0.0
+    "###
+    );
+
+    Ok(())
+}
+
+/// Allow arguments within a `requirements.txt` file to be quoted or unquoted, as in the CLI.
+#[test]
+fn unquoted_arguments() -> Result<()> {
+    let context = TestContext::new("3.12");
+
+    let constraints_in = context.temp_dir.child("constraints.in");
+    constraints_in.write_str(indoc::indoc! {r"
+        iniconfig==1.0.0
+    "})?;
+
+    let requirements_in = context.temp_dir.child("requirements.in");
+    requirements_in.write_str(indoc::indoc! {r"
+       --constraint ./constraints.in
+
+        iniconfig
+    "})?;
+
+    uv_snapshot!(context.pip_install()
+        .arg("-r")
+        .arg("requirements.in"), @r###"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Resolved 1 package in [TIME]
+    Prepared 1 package in [TIME]
+    Installed 1 package in [TIME]
+     + iniconfig==1.0.0
+    "###
+    );
+
+    Ok(())
+}
+
+/// Allow arguments within a `requirements.txt` file to be quoted or unquoted, as in the CLI.
+#[test]
+fn concatenated_quoted_arguments() -> Result<()> {
+    let context = TestContext::new("3.12");
+
+    let constraints_in = context.temp_dir.child("constraints.in");
+    constraints_in.write_str(indoc::indoc! {r"
+        iniconfig==1.0.0
+    "})?;
+
+    let requirements_in = context.temp_dir.child("requirements.in");
+    requirements_in.write_str(indoc::indoc! {r#"
+       --constraint "./constr""aints.in"
+
+        iniconfig
+    "#})?;
+
+    uv_snapshot!(context.pip_install()
+        .arg("-r")
+        .arg("requirements.in"), @r###"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Resolved 1 package in [TIME]
+    Prepared 1 package in [TIME]
+    Installed 1 package in [TIME]
+     + iniconfig==1.0.0
     "###
     );
 
