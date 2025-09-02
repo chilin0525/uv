@@ -405,8 +405,8 @@ impl NoSolutionError {
                 the resolution failed for other Python versions supported by your \
                 project. Consider limiting your project's supported Python versions \
                 using `requires-python`.",
-                "hint".bold().cyan(),
-                ":".bold(),
+                "hint".cyan(),
+                ":",
                 current_python_version,
             )?;
         } else if !markers.evaluate(&self.current_environment, &[]) {
@@ -414,8 +414,8 @@ impl NoSolutionError {
                 f,
                 "\n\n{}{} The resolution failed for an environment that is not the current one, \
                 consider limiting the environments with `tool.uv.environments`.",
-                "hint".bold().cyan(),
-                ":".bold(),
+                "hint".cyan(),
+                ":",
             )?;
         }
         Ok(())
